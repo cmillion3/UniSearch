@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorites</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+    header { background: #004080; color: white; padding: 1rem; text-align: center; }
+    nav { background: #eee; padding: 0.5rem; text-align: center; }
+    nav a { margin: 0 10px; text-decoration: none; color: #004080; font-weight: bold; }
+    #favorites { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; }
+    .card { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 0.5rem; }
+    .uni-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .link a { text-decoration: none; color: #004080; font-weight: bold; }
+    .notes { width: 100%; height: 60px; margin-top: 0.5rem; }
+    .remove-btn { margin-top: 0.5rem; padding: 0.4rem 0.6rem; border: none; border-radius: 5px; cursor: pointer; background: #ff6666; color: white; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>My Favorites</h1>
+</header>
+
+<nav>
+  <a href="index.html">Search</a> | <a href="favorites.html">Favorites</a>
+</nav>
+
+<section id="favorites"></section>
+
+<script>
+const LOGO_DEV_TOKEN = "pk_TqbhE60QRDi4zBEHwwmdOg"; // same token
+
+function getFavorites() {
+  return JSON.parse(localStorage.getItem("favorites") || "[]");
+}
+
+function saveFavorites(favs) {
+  localStorage.setItem("favorites", JSON.stringify(favs));
+}
+
+function removeFavorite(domain) {
+  let favorites = getFavorites().filter(f => f.domains[0] !== domain);
+  saveFavorites(favorites);
+  renderFavorites();
+}
+
+function saveNote(domain, note) {
+  localStorage.setItem(`note-${domain}`, note);
+}
+
+function getNote(domain) {
+  return localStorage.getItem(`note-${domain}`) || "";
+}
+
+function renderFavorites() {
+  const container = document.getElementById("favorites");
+  container.innerHTML = "";
+  const favorites = getFavorites();
+
+  favorites.forEach(uni => {
+    let domain = "";
+    try { domain = new URL(uni.web_pages[0]).hostname; }
+    catch { domain = uni.domains[0] || ""; }
+
+    const logoUrl = domain
+      ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}`
+      : "https://via.placeholder.com/80";
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${logoUrl}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/80'">
+      <div class="uni-name">${uni.name}</div>
+      <div class="link"><a href="${uni.web_pages[0]}" target="_blank">${uni.web_pages[0]}</a></div>
+      <textarea class="notes" placeholder="Your notes...">${getNote(uni.domains[0])}</textarea>
+      <button class="remove-btn" onclick="removeFavorite('${uni.domains[0]}')">Remove</button>
+    `;
+
+    const textarea = card.querySelector(".notes");
+    textarea.addEventListener("input", (e) => {
+      saveNote(uni.domains[0], e.target.value);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+renderFavorites();
+</script>
+
+</body>
+</html>
