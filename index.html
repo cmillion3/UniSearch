@@ -46,7 +46,7 @@
 <section id="results"></section>
 
 <script>
-const LOGO_DEV_TOKEN = "pk_TqbhE60QRDi4zBEHwwmdOg"; // replace with your token
+const LOGO_DEV_TOKEN = "pk_TqbhE60QRDi4zBEHwwmdOg"; // This token is a publishable key meaning it's safe to use and expose publically HOWEVER it is rate limited. I suggest you get your own at https://www.logo.dev/
 
 function getFavorites() {
   return JSON.parse(localStorage.getItem("favorites") || "[]");
